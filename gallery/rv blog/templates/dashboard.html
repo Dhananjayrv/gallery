@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Media Management</title>
+    <!-- Add Bootstrap CSS link -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Add your stylesheets and scripts here -->
+    <style>
+        body {
+            background: linear-gradient(135deg, #3494e6, #ec6ead);
+            color: #ffffff;
+            font-family: 'Open Sans', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            margin-top: 5%;
+        }
+
+        #mediaPreview {
+            margin-top: 10px;
+            width: auto;
+            height: auto;
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        /* Add dark grey color to text */
+        h1, h2, p, label, option {
+            color: #333333; /* Dark grey color */
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1 class="text-center">Welcome to the Media Management Page</h1>
+        <p class="text-center">Use the form below to upload or delete media.</p>
+
+        <!-- Upload Media Form -->
+        <form action="/upload_media" method="post" enctype="multipart/form-data" class="mb-4">
+            <h2>Upload Media</h2>
+            <div class="form-group">
+                <label for="addTitle">Title:</label>
+                <input type="text" id="addTitle" name="title" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+                <label for="addMedia">Media:</label>
+                <input type="file" id="addMedia" name="media" class="form-control-file" accept="image/*, video/*">
+                <!-- Media preview box -->
+                <div id="mediaPreview"></div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Upload Media</button>
+        </form>
+
+        <!-- Delete Media Form -->
+        <form action="/delete_media" method="post">
+            <h2>Delete Media</h2>
+            <div class="form-group">
+                <label for="deleteTitle">Title to Delete:</label>
+                <select id="deleteTitle" name="media_id" class="form-control" required>
+                    {% for media in media_list %}
+                        <option value="{{ media.id }}">{{ media.title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-danger">Delete Media</button>
+        </form>
+
+        <!-- Add Bootstrap JS and Popper.js -->
+        <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+        <!-- Add your additional content or scripts here -->
+
+        <!-- Script for media preview -->
+        <script>
+            // Function to preview the selected media and display filename
+            function previewAndDisplayMedia(input, previewId) {
+                var preview = document.getElementById(previewId);
+                var file = input.files[0];
+                var reader = new FileReader();
+        
+                reader.onloadend = function () {
+                    // Display the media and filename
+                    preview.innerHTML = ''; // Clear previous content
+        
+                    if (file.type.startsWith('image/')) {
+                        // Display image preview
+                        var image = document.createElement('img');
+                        image.src = reader.result;
+                        image.alt = 'Media Preview';
+                        preview.appendChild(image);
+                    } else if (file.type.startsWith('video/')) {
+                        // Display video preview
+                        var video = document.createElement('video');
+                        video.preload = 'auto';
+                        video.controls = true;
+        
+                        // Set a source element with the correct MIME type
+                        var source = document.createElement('source');
+                        source.src = reader.result;
+                        source.type = file.type;
+                        video.appendChild(source);
+        
+                        preview.appendChild(video);
+                    }
+        
+                    displayMediaFilename(preview, file);
+                }
+        
+                if (file) {
+                    reader.readAsDataURL(file);
+                } else {
+                    // Reset the preview if no file is selected
+                    preview.innerHTML = '';
+                }
+            }
+        
+            // Attach the previewAndDisplayMedia function to the change event of the file input
+            document.getElementById('addMedia').addEventListener('change', function () {
+                previewAndDisplayMedia(this, 'mediaPreview');
+            });
+        
+            // Function to display the media filename in the preview box
+            function displayMediaFilename(preview, file) {
+                if (file) {
+                    // Display the filename in the preview box
+                    var filename = file.name;
+                    preview.insertAdjacentHTML('beforeend', '<strong>' + filename + '</strong>');
+                }
+            }
+        </script>
+    </div>
+</body>
+
+</html>
